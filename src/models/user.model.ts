@@ -1,0 +1,36 @@
+import mongoose, { Document, mongo } from "mongoose";
+
+interface IUSer extends Document {
+  name: string;
+  email: string;
+  password?: string;
+  role:"user"| "partner" | "admin";
+  createdAt: Date;
+  updatedAt: Date;
+}
+const userSchema = new mongoose.Schema<IUSer>(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+    },
+    role:{
+      type:String,
+      default:"user",
+      enum:["user","partner","admin"]
+    }
+  },
+  { timestamps: true },
+);
+
+const User =mongoose.models.User || mongoose.model("User", userSchema);
+
+export default User;

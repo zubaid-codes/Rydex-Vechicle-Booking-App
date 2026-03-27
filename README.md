@@ -26,4 +26,8 @@ Rydex is a full-stack vehicle booking web application that allows users to book 
 
 ```bash
 git clone https://github.com/your-username/rydex.git
+<<<<<<< HEAD
 cd rydex
+=======
+cd rydex
+>>>>>>> 3fe0d0e (Initial commit - vehicle booking project)
