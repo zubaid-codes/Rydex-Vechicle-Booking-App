@@ -1,16 +1,19 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import AuthModal from "./AuthModal";
 
 const nav_Items = ["Home", "Bookings", "About Us", "Contact"];
 
 function Navbar() {
   const pathName = usePathname();
+  const [authOpen,setAuthOpen] = useState(false);
 
   return (
+    <>
     <motion.div
       initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -21,7 +24,7 @@ function Navbar() {
         <Image src="/logo.png" alt="Logo" width={44} height={44} priority />
 
         {/* Nav Links */}
-        <div className="flex gap-6">
+        <div className="flex gap-10 hidden md:flex items-center">
           {nav_Items.map((item, index) => {
             const href =
               item === "Home" ? "/" : `/${item.toLowerCase().replace(" ", "")}`;
@@ -31,7 +34,7 @@ function Navbar() {
               <Link
                 key={index}
                 href={href}
-                className={`text-sm font-medium transition ${
+                className={`text-sm  font-medium transition ${
                   active ? "text-white" : "text-gray-400 hover:text-white"
                 }`}
               >
@@ -40,8 +43,28 @@ function Navbar() {
             );
           })}
         </div>
+
+        <button onClick={()=>setAuthOpen(true)}
+      
+          className="group relative px-5 py-2 rounded-full text-sm font-medium 
+      text-white overflow-hidden
+      bg-white/10 backdrop-blur-lg border border-white/20
+      hover:bg-white/20 transition-all duration-300"
+        >
+          {/* Subtle Glow */}
+          <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition duration-300" />
+
+          {/* Text */}
+          <span className="relative tracking-wide">Login</span>
+        </button>
       </div>
+
+      
     </motion.div>
+
+    <AuthModal open={authOpen} onClose={()=>setAuthOpen(false)}/>
+    
+    </>
   );
 }
 
