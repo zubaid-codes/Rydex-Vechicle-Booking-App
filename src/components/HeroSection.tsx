@@ -9,7 +9,7 @@ const vehicles = [
   { icon: Truck },
   { icon: Van },
 ];
-function HeroSection() {
+function HeroSection({onAuthRequired}:{onAuthRequired:()=>void}) {
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       <div
@@ -77,6 +77,7 @@ function HeroSection() {
           shadow-lg shadow-blue-500/30
           hover:shadow-blue-500/50
           transition-all duration-300"
+          onClick={onAuthRequired}
         >
           Book Now →
         </motion.button>

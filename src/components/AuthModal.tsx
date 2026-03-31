@@ -1,8 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Lock, Mail, User, X } from "lucide-react";
+import { CircleDashed, Lock, Mail, User, X } from "lucide-react";
 import Image from "next/image";
+import axios from "axios";
+import { signIn, useSession } from "next-auth/react";
 
 type propType = {
   open: boolean;
@@ -13,6 +15,43 @@ type stepType = "login" | "signup" | "otp";
 
 function AuthModal({ open, onClose }: propType) {
   const [step, setStep] = useState<stepType>("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err,setErr] =useState("")
+
+  const {data} = useSession();
+  console.log(data)
+
+  const handleSignup = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.post("/api/auth/register", {
+        name,
+        email,
+        password,
+      });
+      console.log(data);
+      setLoading(false);
+    } catch (error:any) {
+      setLoading(false);
+      setErr(error.response.data.message ?? "Something went Wrong");
+    }
+  };
+
+  const handleLogin=async()=>{
+    setLoading(true)
+    const res = await signIn("credentials",{
+       email,password,redirect:false
+    })
+    setLoading(false)
+    console.log(res)
+  }
+
+  const handleGoogleLogin = async()=>{
+    await signIn("google")
+  }
 
   return (
     <AnimatePresence>
@@ -38,7 +77,7 @@ function AuthModal({ open, onClose }: propType) {
                   onClick={onClose}
                   className="absolute right-4 top-4 text-gray-300 hover:text-white transition"
                 >
-                  <X />
+                  <X className="cursor-pointer" />
                 </button>
 
                 {/* Branding */}
@@ -52,7 +91,7 @@ function AuthModal({ open, onClose }: propType) {
                 </div>
 
                 {/* Google Button */}
-                <button className="w-full h-11 rounded-xl bg-white text-black flex items-center justify-center gap-3 text-sm font-semibold hover:scale-[1.03] active:scale-[0.98] transition">
+                <button onClick={handleGoogleLogin} className="w-full h-11 rounded-xl bg-white text-black flex items-center justify-center gap-3 text-sm font-semibold hover:scale-[1.03] active:scale-[0.98] transition">
                   <Image
                     src={"/google.png"}
                     alt="Google"
@@ -83,6 +122,8 @@ function AuthModal({ open, onClose }: propType) {
                       <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-white/10 border border-white/20 focus-within:border-cyan-400 focus-within:shadow-[0_0_10px_rgba(34,211,238,0.6)] transition">
                         <Mail size={18} className="text-gray-300" />
                         <input
+                          onChange={(e) => setEmail(e.target.value)}
+                          value={email}
                           type="email"
                           placeholder="example@gmail.com"
                           className="w-full bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -93,6 +134,8 @@ function AuthModal({ open, onClose }: propType) {
                       <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-white/10 border border-white/20 focus-within:border-cyan-400 focus-within:shadow-[0_0_10px_rgba(34,211,238,0.6)] transition">
                         <Lock size={18} className="text-gray-300" />
                         <input
+                          onChange={(e) => setPassword(e.target.value)}
+                          value={password}
                           type="password"
                           placeholder="Enter your password"
                           className="w-full bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -100,8 +143,19 @@ function AuthModal({ open, onClose }: propType) {
                       </div>
 
                       {/* Login Button */}
-                      <button className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 hover:opacity-90 transition shadow-lg">
-                        Login
+                      <button
+                        onClick={handleLogin}
+                        className="w-full flex justify-center items-center h-11 rounded-xl font-semibold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 hover:opacity-90 transition shadow-lg"
+                      >
+                        {!loading ? (
+                          "Login"
+                        ) : (
+                          <CircleDashed
+                            size={18}
+                            color="white"
+                            className="animate-spin"
+                          />
+                        )}
                       </button>
                     </div>
 
@@ -131,6 +185,8 @@ function AuthModal({ open, onClose }: propType) {
                       <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-white/10 border border-white/20 focus-within:border-cyan-400 focus-within:shadow-[0_0_10px_rgba(34,211,238,0.6)] transition">
                         <User size={18} className="text-gray-300" />
                         <input
+                          onChange={(e) => setName(e.target.value)}
+                          value={name}
                           type="text"
                           placeholder="Full Name"
                           className="w-full bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -140,6 +196,8 @@ function AuthModal({ open, onClose }: propType) {
                       <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-white/10 border border-white/20 focus-within:border-cyan-400 focus-within:shadow-[0_0_10px_rgba(34,211,238,0.6)] transition">
                         <Mail size={18} className="text-gray-300" />
                         <input
+                          onChange={(e) => setEmail(e.target.value)}
+                          value={email}
                           type="email"
                           placeholder="example@gmail.com"
                           className="w-full bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -150,15 +208,31 @@ function AuthModal({ open, onClose }: propType) {
                       <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-white/10 border border-white/20 focus-within:border-cyan-400 focus-within:shadow-[0_0_10px_rgba(34,211,238,0.6)] transition">
                         <Lock size={18} className="text-gray-300" />
                         <input
+                          onChange={(e) => setPassword(e.target.value)}
+                          value={password}
                           type="password"
                           placeholder="Enter your password"
                           className="w-full bg-transparent outline-none text-sm placeholder:text-gray-400"
                         />
                       </div>
 
+                      {err && <p className="text-red-500 ">{err}</p>}
+
                       {/*  signup button */}
-                      <button className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 hover:opacity-90 transition shadow-lg">
-                        Login
+                      <button
+                        onClick={handleSignup}
+                        disabled={loading}
+                        className="w-full flex justify-center items-center h-11 rounded-xl font-semibold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 hover:opacity-90 transition shadow-lg"
+                      >
+                        {!loading ? (
+                          "Sign Up"
+                        ) : (
+                          <CircleDashed
+                            size={18}
+                            color="white"
+                            className="animate-spin"
+                          />
+                        )}
                       </button>
                     </div>
 

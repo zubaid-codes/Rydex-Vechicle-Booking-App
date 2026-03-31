@@ -24,7 +24,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
 
       async authorize(credentials, request) {
-        if (credentials.email || credentials.password) {
+        if (!credentials.email || !credentials.password) {
           throw Error("Missing Credentials");
         }
 
@@ -59,27 +59,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (account?.provider === "google") {
         await connectDB();
 
-        const dbUser = await User.findOne({ email: user.email });
+        let dbUser = await User.findOne({ email: user.email });
+
         if (!dbUser) {
-          await User.create({
+          dbUser = await User.create({
             name: user.name,
             email: user.email,
           });
         }
 
-        user.id=dbUser._id;
-        user.role=dbUser.role
-       
+        user.id = dbUser._id;
+        user.role = dbUser.role;
       }
 
-       return true;
+      return true;
     },
 
     async jwt({ token, user }) {
-      ((token.name = user.name),
-        (token.id = user.id),
-        (token.email = user.email),
-        (token.role = user.role));
+      if (user) {
+        ((token.name = user.name),
+          (token.id = user.id),
+          (token.email = user.email),
+          (token.role = user.role));
+      }
 
       return token;
     },
@@ -103,5 +105,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt",
     maxAge: 10 * 24 * 60 * 60,
   },
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
 });
