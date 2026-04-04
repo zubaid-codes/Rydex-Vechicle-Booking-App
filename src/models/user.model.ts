@@ -1,6 +1,6 @@
 import mongoose, { Document, mongo } from "mongoose";
 
-interface IUSer extends Document {
+export interface IUSer extends Document {
   name: string;
   email: string;
   password?: string;
